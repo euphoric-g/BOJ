@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 typedef long long ll;
 
@@ -13,40 +14,47 @@ int main() {
     std::ios::sync_with_stdio(0);
     int n;
     std::cin >> n;
-    ll gcd = -1, max_val = 0;
-    ll last = 0;
-    for(int i=0; i<n; i++) {
+    ll acnt = 0;
+    std::vector<ll> km_list;
+    ll bmax = INT64_MIN;
+    while(n--) {
         ll a, b;
         std::cin >> a >> b;
-        if(a > 0 || last + a == b) {
-            last = b;
+        if(acnt + a >= 0) {
+            if(acnt + a != b) {
+                std::cout << "-1\n";
+                return 0;
+            }
+            acnt = b;
             continue;
         }
-        ll km = b - last - a;
-        gcd = gcd == -1 ? km : GCD(gcd, km);
-        max_val = std::max(max_val, b);
+        km_list.push_back(b-a-acnt);
+        bmax = std::max(bmax, b);
+        acnt = b;
     }
-    if(gcd == -1) {
+    if(km_list.empty()) {
         std::cout << "1\n";
-    } else if(max_val >= gcd) {
-        std::cout << "-1\n";
-    } else {
+        return 0;
+    }
+    ll gcd = km_list[0];
+    for(const auto &km : km_list) {
+        // std::cout << km << '\n';
+        gcd = GCD(gcd, km);
+    }
+    // std::cout << gcd << ", " << bmax << '\n';
+    if(gcd > bmax) {
         std::cout << gcd << '\n';
+    } else {
+        std::cout << "-1\n";
     }
     return 0;
-    // 잔액 + 차감액 + k * 최소 충전잔위 M = 새로운 잔액
-    // k * 최소 충전단위 M = 새로운 잔액 - 이전 잔액 - 차감액
-    // ex) kM = 4500 - 1500 + 17000 = 20000;
-    // ex) kM = 9900 - 100 + 200 = 10000;
-    // 20000, 10000
-    // 4500, 9900
-    // kM 값의 GCD와 새 잔액값 저장
-    // kM 값들의 GCD = 10000의 약수 중 새 잔액값의 최댓값보다 큰 값
-    // 10000의 약수 vs 9900 = 10000
-
-    // kM = 0 - 0 + 5 = 5
-    // kM = 1 - 0 + 6 = 7
-    // kM 5, 7
-    // 잔액 0, 1
-    // 1의 약수 중 1보다 큰 값은 없음
 }
+
+/*
+
+기존 잔액 acnt원 + a + 최소 충전단위 * k = b
+최소 충전단위 M * k = b - a - acnt;
+충전 및 결제 후 남은 돈 b는 최소 충전단위 M보다 작아야한다.
+kM 목록과 M의 범위 저장
+
+*/

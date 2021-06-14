@@ -13,7 +13,7 @@ int main() {
     for(int i=0; i<b; i++) {
         password += lower++;
         if(lower > 'z') lower = 'a';
-    }
+    }   
     for(int i=0; i<c; i++) {
         password += digit++;
         if(digit > '9') digit = '0';
