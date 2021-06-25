@@ -1,19 +1,17 @@
 #include <iostream>
 #include <algorithm>
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
 int main() {
-    std::map<std::string, int> map;
+    std::cin.tie(0);
+    std::cout.tie(0);
+    std::ios::sync_with_stdio(0);
+    std::unordered_map<std::string, int> map;
     int n, m;
     std::cin >> n >> m;
-    for(int i=0; i<n; i++) {
-        std::string in;
-        std::cin >> in;
-        map[in]++;
-    }
-    for(int i=0; i<m; i++) {
+    for(int i=0; i<n+m; i++) {
         std::string in;
         std::cin >> in;
         map[in]++;
@@ -24,9 +22,10 @@ int main() {
             dbj.push_back(name.first);
         }
     }
-    std::cout << dbj.size() << std::endl;
+    std::sort(dbj.begin(), dbj.end());
+    std::cout << dbj.size() << '\n';
     for(const auto &name : dbj) {
-        std::cout << name << std::endl;
+        std::cout << name << '\n';
     }
     return 0;
 }
