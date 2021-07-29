@@ -1,14 +1,12 @@
 #include <iostream>
-#include <string>
+#include <cmath>
 #include <vector>
 #include <complex>
-#include <algorithm>
-
-#define FASTIO
-// #define DEBUG
 
 const double PI = acos(-1);
 typedef std::complex<double> cpx;
+
+// #define DEBUG
 
 void FFT(std::vector<cpx> &vec, cpx w) {
     int n = vec.size();
@@ -60,47 +58,31 @@ std::vector<int> poly_mul(std::vector<cpx> &a, std::vector<cpx> &b) {
 }
 
 int main() {
-    #ifdef FASTIO
-    std::cin.tie(0);
-    std::ios::sync_with_stdio(0);
-    #endif
-    std::string s1, s2;
-    std::cin >> s1 >> s2;
-    if(s1 == "0" || s2 == "0") {
-        std::cout << 0 << '\n';
-        return 0;
+    std::cin.tie(0), std::cout.tie(0);
+    std::ios_base::sync_with_stdio(0);
+    int n, m;
+    std::cin >> n;
+    std::vector<cpx> bot_dist(200001, cpx(0, 0));
+    for(int i=0; i<n; i++) {
+        int dist;
+        std::cin >> dist;
+        bot_dist[dist] = cpx(1, 0);
     }
-    std::reverse(s1.begin(), s1.end());
-    std::reverse(s2.begin(), s2.end());
-    std::vector<cpx> a, b;
-    for(const auto &ch : s1) a.push_back(cpx(ch - '0', 0));
-    for(const auto &ch : s2) b.push_back(cpx(ch - '0', 0));
-    auto ret = poly_mul(a, b);
+    bot_dist[0] = cpx(1, 0);
+    std::vector<cpx> copied = bot_dist;
+    std::vector<int> power = poly_mul(bot_dist, copied);
+    std::cin >> m;
+    int cnt = 0;
+    for(int i=0; i<m; i++) {
+        int find;
+        std::cin >> find;
+        if(power[find] > 0) cnt++;
+    }
     #ifdef DEBUG
-    std::cout << "A = ";
-    for(const auto &item : a) {
-        std::cout << item << ' ';
+    for(int i=0; i<20; i++) {
+        std::cout << i << ' ' << power[i] << '\n';
     }
-    std::cout << "\nB = ";
-    for(const auto &item : b) {
-        std::cout << item << ' ';
-    }
-    std::cout << "\nANS = ";
-    for(const auto &item : ret) {
-        std::cout << item << ' ';
-    }
-    std::cout << '\n';
     #endif
-    for(int i=0; i<ret.size(); i++) {
-        if(ret[i] >= 10) {
-            ret[i+1] += ret[i] / 10;
-            ret[i] %= 10;
-        }
-    }
-    while(ret.back() == 0) ret.pop_back();
-    std::reverse(ret.begin(), ret.end());
-    for(const auto &item : ret) {
-        std::cout << item;
-    }
-    std::cout << '\n';
+    std::cout << cnt << '\n';
+    return 0;
 }
