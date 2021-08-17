@@ -21,6 +21,7 @@ int main() {
     int start = 0, last = 0, maxlen = 0;
     int len = judge(vec[0]) == EVEN ? 1 : 0;
     int skips = judge(vec[0]) == ODD ? 1 : 0;
+    maxlen = std::max(maxlen, len);
     while(1) {
         if(skips <= k) {
             if(++last >= vec.size()) break;
