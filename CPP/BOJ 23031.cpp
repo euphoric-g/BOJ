@@ -358,28 +358,91 @@ vector<int> multiply_polynomial(vector<cpx> &a, vector<cpx> &b) {
 // Definitions
 
 // typedefs
+typedef tuple<int, int, int> loc;
 
 // Global Variables
+const char BLANK = 'O', SWITCH = 'S', ZOMBIE = 'Z';
+const char FRONT = 'F', TURN_LEFT = 'L', TURN_RIGHT = 'R';
+const int DOWN = 0;
+const int LEFT = 1;
+const int UP = 2;
+const int RIGHT = 3;
+const int dx[] = {1, 0, -1, 0, 1, 1, -1, -1, 0};
+const int dy[] = {0, -1, 0, 1, 1, -1, 1, -1, 0};
+// 현재 위치 + 상하좌우 + 대각선 벡터
+int n;
+string A;
+vstr map_dasol;
+bool light[20][20];
 
 // functions
+void turn_left(int &dir) { dir = (dir+3)%4; }
+void turn_right(int &dir) { dir = (++dir)%4; }
+void turn_back(int &dir) { dir = (dir+2)%4; }
+bool check(pii p) {
+    return p.first >= 0 && p.first < n && p.second >= 0 && p.second < n;
+}
+loc next(loc cur, int who) {
+    int x, y, dir;
+    tie(x, y, dir) = cur;
+    x += dx[dir], y += dy[dir];
+    if(!check({x, y})) {
+        if(who == 0) return cur;
+        return make_tuple(x-dx[dir], y-dy[dir], (dir+2)%4);
+    }
+    return make_tuple(x, y, dir);
+}
 
 int main() {
     FASTIO;
-    pq_min pq;
-    int n;
-    cin >> n;
-    while(n--) {
-        int num;
-        cin >> num;
-        if(num != 0) {
-            pq.push(num);
-        } else {
-            if(pq.empty()) {
-                cout << 0 << '\n';
-            } else {
-                cout << pq.top() << '\n';
-                pq.pop();
+    cin >> n >> A;
+    map_dasol = GET_N_STR(n);
+    REP(i, 0, n) REP(j, 0, n) light[i][j] = false;
+    vector<loc> zombies;
+    REP(i, 0, n) {
+        REP(j, 0, n) {
+            if(map_dasol[i][j] == ZOMBIE) {
+                map_dasol[i][j] = BLANK;
+                zombies.push_back(make_tuple(i, j, DOWN));
             }
         }
     }
+    pii cur = {0, 0};
+    int dir = DOWN;
+    bool alive = true;
+    REP(i, 0, SIZE(A)) {
+        if(!alive) break;
+        // Action
+        if(A[i] == FRONT) {
+            auto forward = next(make_tuple(cur.first, cur.second, dir), 0);
+            tie(cur.first, cur.second, dir) = forward;
+            if(map_dasol[cur.first][cur.second] == SWITCH) {
+                REP(j, 0, 9) {
+                    pii next = {cur.first + dx[j], cur.second + dy[j]};
+                    if(check(next)) light[next.first][next.second] = true;
+                }
+            }
+        } else if(A[i] == TURN_LEFT) {
+            turn_left(dir);
+        } else if(A[i] == TURN_RIGHT) {
+            turn_right(dir);
+        }
+        // Zombie move
+        FOREACH(it, zombies) {
+            if(!alive) break;
+            int x, y, dir;
+            tie(x, y, dir) = *it;
+            if(cur.first == x && cur.second == y && !light[cur.first][cur.second] && map_dasol[cur.first][cur.second] != SWITCH) {
+                alive = false;
+            }
+            *it = next(*it, 1);
+            tie(x, y, dir) = *it;
+            if(cur.first == x && cur.second == y && !light[cur.first][cur.second] && map_dasol[cur.first][cur.second] != SWITCH) {
+                alive = false;
+            }
+            // cout << x << ' ' << y << ' ' << dir << '\n';
+        }
+    }
+    if(alive) cout << "Phew...\n";
+    else cout << "Aaaaaah!\n";
 }

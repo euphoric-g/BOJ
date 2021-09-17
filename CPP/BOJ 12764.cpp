@@ -361,25 +361,44 @@ vector<int> multiply_polynomial(vector<cpx> &a, vector<cpx> &b) {
 
 // Global Variables
 
+priority_queue<pii, vpii, pq_cmp::pii_000> pq;
+pq_min nhere;
+int n, check[100005];
+pair<int, int> com[100005];
+
 // functions
 
-int main() {
+int main(void) {
     FASTIO;
-    pq_min pq;
-    int n;
+	int n;
     cin >> n;
-    while(n--) {
-        int num;
-        cin >> num;
-        if(num != 0) {
-            pq.push(num);
-        } else {
-            if(pq.empty()) {
-                cout << 0 << '\n';
-            } else {
-                cout << pq.top() << '\n';
-                pq.pop();
-            }
-        }
-    }
+	REP(i, 0, n) {
+        int a, b;
+		cin >> a >> b;
+		com[i+1] = {a, b};
+	}
+    sort(com+1, com+n+1);
+	for (int i = 1; i <= n; i++) {
+		while (!pq.empty()) {
+			if (pq.top().first <= com[i].first) {
+				nhere.push(pq.top().second);
+				pq.pop();
+			}
+			else break;
+		}
+		if (!nhere.empty()) {
+			pq.push({ com[i].second,nhere.top() });
+			check[nhere.top()] += 1;
+			nhere.pop();
+		}
+		else {
+			int seat = pq.size() + 1;
+			pq.push({com[i].second, pq.size()+1});
+			check[pq.size()] += 1;
+		}
+	}
+    cout << pq.size() + nhere.size() << '\n';
+    REP(i, 0, pq.size()+nhere.size()) cout << check[i+1] << ' ';
+    ENDL;
+	return 0;
 }

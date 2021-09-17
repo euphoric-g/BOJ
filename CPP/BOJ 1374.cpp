@@ -365,21 +365,28 @@ vector<int> multiply_polynomial(vector<cpx> &a, vector<cpx> &b) {
 
 int main() {
     FASTIO;
-    pq_min pq;
     int n;
     cin >> n;
-    while(n--) {
-        int num;
-        cin >> num;
-        if(num != 0) {
-            pq.push(num);
+    vpii vec(n);
+    REP(i, 0, n) {
+        int a, b, c;
+        cin >> a >> b >> c;
+        vec.push_back({b, c});
+    }
+    SORT(vec);
+    pq_min pq;
+    FOREACH(it, vec) {
+        if(pq.empty()) {
+            pq.push(it->second);
+            continue;
+        }
+        auto min = pq.top(); pq.pop();
+        if(min > it->first) {
+            pq.push(min);
+            pq.push(it->second);
         } else {
-            if(pq.empty()) {
-                cout << 0 << '\n';
-            } else {
-                cout << pq.top() << '\n';
-                pq.pop();
-            }
+            pq.push(it->second);
         }
     }
+    cout << SIZE(pq) << '\n';
 }

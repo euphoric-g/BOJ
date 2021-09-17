@@ -3,7 +3,7 @@
 /*
     C++ Template by LJH
 
-    Last Update : 21/09/17
+    Last Update : 21/09/16
 
     Macros
     FASTIO, MAX, MIN, ALL, UNIQUE, UNIQUE_ERASE, FOREACH, REP, POPCOUNT(int, ll), BINSEARCH,
@@ -11,11 +11,12 @@
     DO_PREV_PERMUTATION, GCD, LCM, VINT(vector<int> with n inits), PRINT
     
     Data Structures
-    Segment Tree(for max histogram area, max value), priority_queue(with various comp func)
+    Segment Tree(for max histogram area, max value), Priority_queue(with various comp func)
 
     Algorithm
 
-    KMP, Trie, FFT(Fast Fourier Transform), TSP(Traveling Salesman Problem),
+    KMP, Trie, Segment Tree (for max histogram area, max value),
+    FFT(Fast Fourier Transform), TSP(Traveling Salesman Problem),
     LIS(Longest Increasing Subsequence), (Euler-Phi)
 */
 
@@ -52,39 +53,6 @@ using namespace std;
 #define PRINT(v) REP(i, 0, SIZE(v)) cout << v[i] << ' '; ENDL
 #define PRINTLN(v); REP(i, 0, SIZE(v)) { cout << v[i]; ENDL; }
 #define N_TIMES(n) REP(i, 0, n)
-#define VBOOL(n, b) vector<bool>(n, b)
-
-typedef long long ll;
-typedef unsigned long long ull;
-typedef vector<bool> vb;
-typedef vector<int> vint;
-typedef vector<vint> vvint;
-typedef vector<string> vstr;
-typedef vector<ll> vll;
-typedef vector<double> vd;
-typedef pair<int, int> pii;
-typedef pair<int, string> pis;
-typedef pair<string, string> pss;
-typedef vector<pii> vpii;
-typedef vector<pis> vpis;
-typedef vector<pss> vpss;
-typedef complex<double> cpx;
-
-namespace pq_cmp {
-    struct int_min { bool operator()(const int &a, const int &b) { return a > b; } };
-    struct int_max { bool operator()(const int &a, const int &b) { return a < b; } };
-    struct pii_011 { bool operator()(const pii &a, const pii &b) { if(a.first != b.first) return a.first < b.first; return a.second < b.second; } };
-    struct pii_010 { bool operator()(const pii &a, const pii &b) { if(a.first != b.first) return a.first < b.first; return a.second > b.second; } };
-    struct pii_001 { bool operator()(const pii &a, const pii &b) { if(a.first != b.first) return a.first > b.first; return a.second < b.second; } };
-    struct pii_000 { bool operator()(const pii &a, const pii &b) { if(a.first != b.first) return a.first > b.first; return a.second > b.second; } };
-    struct pii_111 { bool operator()(const pii &a, const pii &b) { if(a.second != b.second) return a.second < b.second; return a.first < b.first; } };
-    struct pii_110 { bool operator()(const pii &a, const pii &b) { if(a.second != b.second) return a.second < b.second; return a.first > b.first; } };
-    struct pii_101 { bool operator()(const pii &a, const pii &b) { if(a.second != b.second) return a.second > b.second; return a.first < b.first; } };
-    struct pii_100 { bool operator()(const pii &a, const pii &b) { if(a.second != b.second) return a.second > b.second; return a.first > b.first; } };
-};
-
-typedef priority_queue<int, vint, pq_cmp::int_min> pq_min;
-typedef priority_queue<int, vint, pq_cmp::int_max> pq_max; 
 
 void FAST_IO() {
     std::cin.tie(0);
@@ -110,12 +78,6 @@ vector<string> PARSE(string str, char delim) {
     return ret;
 }
 
-vvint INIT_VVINT(int n, int m, int init) {
-    vvint ret;
-    REP(i, 0, n) ret.push_back(VINT(m, init));
-    return ret;
-}
-
 string GET_ONE_LINE() {
     string ret;
     getline(cin, ret);
@@ -128,23 +90,17 @@ vector<int> GET_N_INTS(int n) {
     return ret;
 }
 
-vector<pair<int, int>> GET_N_PII(int n) {
-    vector<pair<int, int>> ret;
-    REP(i, 0, n) {
-        int a, b;
-        cin >> a >> b;
-        ret.push_back({a, b});
-    }
-    return ret;
-}
-
-vector<string> GET_N_STR(int n) {
+vector<string> GET_N_STRING(int n) {
     vector<string> ret = VSTR(n);
     REP(i, 0, n) cin >> ret[i];
     return ret;
 }
 
 const double PI = acos(-1);
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef complex<double> cpx;
 
 class Trie {
     /*
@@ -355,31 +311,51 @@ vector<int> multiply_polynomial(vector<cpx> &a, vector<cpx> &b) {
     return ans;
 }
 
-// Definitions
-
-// typedefs
-
-// Global Variables
-
-// functions
+int dp[2000010][3];
+int sum[2000010][2];
 
 int main() {
     FASTIO;
-    pq_min pq;
-    int n;
-    cin >> n;
-    while(n--) {
-        int num;
-        cin >> num;
-        if(num != 0) {
-            pq.push(num);
-        } else {
-            if(pq.empty()) {
-                cout << 0 << '\n';
-            } else {
-                cout << pq.top() << '\n';
-                pq.pop();
-            }
+    string query;
+    cin >> query;
+    int cnt = 0;
+    REP(i, 0, SIZE(query)) {
+        if(query[i] == '-') dp[cnt][2] = !dp[cnt][2];
+        else {
+            ++cnt;
         }
     }
+    dp[cnt][0] = 1;
+    dp[cnt][1] = 0;
+    for(int i=cnt-1; i>0; i--) {
+        if(dp[i][2]) {
+            dp[i][0] = dp[i+1][1] + 1;
+            dp[i][1] = dp[i+1][0];
+        } else {
+            dp[i][0] = dp[i+1][0] + 1;
+            dp[i][1] = dp[i+1][1];
+        }
+    }
+    cnt = 0;
+    REP(i, 0, SIZE(query)) {
+        if(query[i] != '-') {
+            ++cnt;
+            sum[dp[cnt][0]-1][0] += query[i] - '0';
+            sum[cnt+dp[cnt][1]-1][0] += query[i] - '0';
+            sum[cnt-1][0] -= query[i] - '0';
+        }
+    }
+    for(int i=2000008; i>=0; i--) {
+        sum[i][1] = sum[i+1][1] + sum[i][0];
+    }
+    REP(i, 0, 2000010) {
+        sum[i+1][1] += sum[i][1] / 10;
+        sum[i][1] %= 10;
+    }
+    string ans;
+    REP(i, 0, 2000010) ans += sum[i][1] + '0';
+    while(!ans.empty() && ans.back() == '0') ans.pop_back();
+    REV(ans);
+    cout << ans << '\n';
+    return 0;
 }

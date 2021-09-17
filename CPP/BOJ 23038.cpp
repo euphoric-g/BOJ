@@ -3,7 +3,7 @@
 /*
     C++ Template by LJH
 
-    Last Update : 21/09/17
+    Last Update : 21/09/16
 
     Macros
     FASTIO, MAX, MIN, ALL, UNIQUE, UNIQUE_ERASE, FOREACH, REP, POPCOUNT(int, ll), BINSEARCH,
@@ -11,11 +11,12 @@
     DO_PREV_PERMUTATION, GCD, LCM, VINT(vector<int> with n inits), PRINT
     
     Data Structures
-    Segment Tree(for max histogram area, max value), priority_queue(with various comp func)
+    Segment Tree(for max histogram area, max value), Priority_queue(with various comp func)
 
     Algorithm
 
-    KMP, Trie, FFT(Fast Fourier Transform), TSP(Traveling Salesman Problem),
+    KMP, Trie, Segment Tree (for max histogram area, max value),
+    FFT(Fast Fourier Transform), TSP(Traveling Salesman Problem),
     LIS(Longest Increasing Subsequence), (Euler-Phi)
 */
 
@@ -52,39 +53,6 @@ using namespace std;
 #define PRINT(v) REP(i, 0, SIZE(v)) cout << v[i] << ' '; ENDL
 #define PRINTLN(v); REP(i, 0, SIZE(v)) { cout << v[i]; ENDL; }
 #define N_TIMES(n) REP(i, 0, n)
-#define VBOOL(n, b) vector<bool>(n, b)
-
-typedef long long ll;
-typedef unsigned long long ull;
-typedef vector<bool> vb;
-typedef vector<int> vint;
-typedef vector<vint> vvint;
-typedef vector<string> vstr;
-typedef vector<ll> vll;
-typedef vector<double> vd;
-typedef pair<int, int> pii;
-typedef pair<int, string> pis;
-typedef pair<string, string> pss;
-typedef vector<pii> vpii;
-typedef vector<pis> vpis;
-typedef vector<pss> vpss;
-typedef complex<double> cpx;
-
-namespace pq_cmp {
-    struct int_min { bool operator()(const int &a, const int &b) { return a > b; } };
-    struct int_max { bool operator()(const int &a, const int &b) { return a < b; } };
-    struct pii_011 { bool operator()(const pii &a, const pii &b) { if(a.first != b.first) return a.first < b.first; return a.second < b.second; } };
-    struct pii_010 { bool operator()(const pii &a, const pii &b) { if(a.first != b.first) return a.first < b.first; return a.second > b.second; } };
-    struct pii_001 { bool operator()(const pii &a, const pii &b) { if(a.first != b.first) return a.first > b.first; return a.second < b.second; } };
-    struct pii_000 { bool operator()(const pii &a, const pii &b) { if(a.first != b.first) return a.first > b.first; return a.second > b.second; } };
-    struct pii_111 { bool operator()(const pii &a, const pii &b) { if(a.second != b.second) return a.second < b.second; return a.first < b.first; } };
-    struct pii_110 { bool operator()(const pii &a, const pii &b) { if(a.second != b.second) return a.second < b.second; return a.first > b.first; } };
-    struct pii_101 { bool operator()(const pii &a, const pii &b) { if(a.second != b.second) return a.second > b.second; return a.first < b.first; } };
-    struct pii_100 { bool operator()(const pii &a, const pii &b) { if(a.second != b.second) return a.second > b.second; return a.first > b.first; } };
-};
-
-typedef priority_queue<int, vint, pq_cmp::int_min> pq_min;
-typedef priority_queue<int, vint, pq_cmp::int_max> pq_max; 
 
 void FAST_IO() {
     std::cin.tie(0);
@@ -110,12 +78,6 @@ vector<string> PARSE(string str, char delim) {
     return ret;
 }
 
-vvint INIT_VVINT(int n, int m, int init) {
-    vvint ret;
-    REP(i, 0, n) ret.push_back(VINT(m, init));
-    return ret;
-}
-
 string GET_ONE_LINE() {
     string ret;
     getline(cin, ret);
@@ -128,23 +90,17 @@ vector<int> GET_N_INTS(int n) {
     return ret;
 }
 
-vector<pair<int, int>> GET_N_PII(int n) {
-    vector<pair<int, int>> ret;
-    REP(i, 0, n) {
-        int a, b;
-        cin >> a >> b;
-        ret.push_back({a, b});
-    }
-    return ret;
-}
-
-vector<string> GET_N_STR(int n) {
+vector<string> GET_N_STRING(int n) {
     vector<string> ret = VSTR(n);
     REP(i, 0, n) cin >> ret[i];
     return ret;
 }
 
 const double PI = acos(-1);
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef complex<double> cpx;
 
 class Trie {
     /*
@@ -355,31 +311,26 @@ vector<int> multiply_polynomial(vector<cpx> &a, vector<cpx> &b) {
     return ans;
 }
 
-// Definitions
-
-// typedefs
-
-// Global Variables
-
-// functions
-
 int main() {
     FASTIO;
-    pq_min pq;
-    int n;
-    cin >> n;
-    while(n--) {
-        int num;
-        cin >> num;
-        if(num != 0) {
-            pq.push(num);
-        } else {
-            if(pq.empty()) {
-                cout << 0 << '\n';
-            } else {
-                cout << pq.top() << '\n';
-                pq.pop();
+    int n, m;
+    cin >> n >> m;
+    auto vec = GET_N_STRING(3*n);
+    auto check = [&vec, &n, &m](int x, int y) -> char {
+        return (x >= 0 && x < 3*n && y >= 0 && y < 3*m && vec[x][y] == '#') ? '#' : '.';
+    };
+    REP(i, 0, n) {
+        REP(j, 0, m) {
+            if((i+j) % 2 == 1) {
+                int ux = i*3-1, uy = j*3+1, lx = i*3+1, ly = j*3-1, rx = i*3+1, ry = j*3+3;
+                int dx = i*3+3, dy = j*3+1;
+                vec[i*3][j*3+1] = check(ux, uy);
+                vec[i*3+1][j*3] = check(lx, ly);
+                vec[i*3+1][j*3+2] = check(rx, ry);
+                vec[i*3+2][j*3+1] = check(dx, dy);
+                vec[i*3+1][j*3+1] = (vec[i*3][j*3+1] == '#' || vec[i*3+1][j*3] == '#' || vec[i*3+1][j*3+2] == '#' || vec[i*3+2][j*3+1] == '#') ? '#' : '.';
             }
         }
     }
+    PRINTLN(vec);
 }

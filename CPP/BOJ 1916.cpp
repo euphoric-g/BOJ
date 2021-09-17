@@ -355,31 +355,36 @@ vector<int> multiply_polynomial(vector<cpx> &a, vector<cpx> &b) {
     return ans;
 }
 
-// Definitions
-
-// typedefs
-
-// Global Variables
-
-// functions
+int cost[1010];
+bool visited[1010];
+vpii bus[1010];
 
 int main() {
     FASTIO;
-    pq_min pq;
-    int n;
-    cin >> n;
-    while(n--) {
-        int num;
-        cin >> num;
-        if(num != 0) {
-            pq.push(num);
-        } else {
-            if(pq.empty()) {
-                cout << 0 << '\n';
-            } else {
-                cout << pq.top() << '\n';
-                pq.pop();
-            }
-        }
+    int n, m;
+    cin >> n >> m;
+    const int INF = 11'0000'0000;
+    REP(i, 0, n) { cost[i] = INF; visited[i] = false; }
+    REP(i, 0, m) {
+        int s, e, c;
+        cin >> s >> e >> c;
+        --s, --e;
+        bus[s].push_back({e, c});
     }
+    int s, e;
+    cin >> s >> e;
+    --s, --e;
+    priority_queue<pii, vpii, pq_cmp::pii_111> pq;
+    pq.push({s, cost[s] = 0});
+    while(!pq.empty()) {
+        auto cur = pq.top(); pq.pop();
+        if(visited[cur.first]) continue;
+        // cout << cur.first << ' ' << cur.second << '\n';
+        for(auto &line : bus[cur.first]) {
+            cost[line.first] = min(cost[line.first], cost[cur.first] + line.second);
+            if(cost[line.first] < INF) pq.push({line.first, cost[line.first]});
+        }
+        visited[cur.first] = true;
+    }
+    cout << cost[e] << '\n';
 }
