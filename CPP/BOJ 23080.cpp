@@ -509,45 +509,11 @@ pll CRT(vll &M, vll &A) {
 
 int main() {
     FASTIO;
-    int t;
-    cin >> t;
-    while(t--) {
-        int a, b;
-        cin >> a >> b;
-        queue<pair<int, string>> q;
-        q.push({a, ""});
-        bool find = false;
-        string ret;
-        int visited[10000] = {0, };
-        visited[a]++;
-        while(!q.empty() && !find) {
-            auto get = q.front(); q.pop();
-            if(get.first == b) {
-                find = true;
-                ret = get.second;
-                break;
-            }
-            int D = (get.first * 2) % 10000;
-            int S = (get.first + 9999) % 10000;
-            int L = (get.first * 10 + get.first / 1000) % 10000;
-            int R = ((get.first % 10) * 1000 + (get.first / 10)) % 10000;
-            if(visited[D] == 0) {
-                visited[D] = 1;
-                q.push({D, get.second + "D"});
-            }
-            if(visited[S] == 0) {
-                visited[S] = 1;
-                q.push({S, get.second + "S"});
-            }
-            if(visited[L] == 0) {
-                visited[L] = 1;
-                q.push({L, get.second + "L"});
-            }
-            if(visited[R] == 0) {
-                visited[R] = 1;
-                q.push({R, get.second + "R"});
-            }
-        }
-        cout << ret << '\n';
+    int k;
+    string s;
+    cin >> k >> s;
+    for(int i=0; i<s.size(); i++) {
+        if(i % k == 0) cout << s[i];
     }
+    ENDL;
 }

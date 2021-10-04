@@ -504,50 +504,44 @@ pll CRT(vll &M, vll &A) {
 // typedefs
 
 // Global Variables
-
+const int dx[] = {0, 1, 0, -1, -1, -1, 1, 1};
+const int dy[] = {1, 0, -1, 0, -1, 1, -1, 1};
 // functions
 
 int main() {
     FASTIO;
-    int t;
-    cin >> t;
-    while(t--) {
-        int a, b;
-        cin >> a >> b;
-        queue<pair<int, string>> q;
-        q.push({a, ""});
-        bool find = false;
-        string ret;
-        int visited[10000] = {0, };
-        visited[a]++;
-        while(!q.empty() && !find) {
-            auto get = q.front(); q.pop();
-            if(get.first == b) {
-                find = true;
-                ret = get.second;
-                break;
+    int n;
+    cin >> n;
+    auto pos_check = [&n](pii a) -> bool {
+        return a.first >= 0 && a.first < n && a.second >= 0 && a.second < n;
+    };
+    auto vec = GET_N_STR(n);
+    pii max_loc = {-1, -1};
+    int max_flip = 0;
+    for(int i=0; i<n; i++) {
+        for(int j=0; j<n; j++) {
+            if(vec[i][j] != '.') continue;
+            pii cur = {i, j};
+            int flip = 0;
+            REP(k, 0, 8) {
+                // k 방향으로 뒤집을수 있는지 확인
+                int dist = 0;
+                while(pos_check({cur.first + (dist+1)*dx[k], cur.second + (dist+1)*dy[k]}) && vec[cur.first + (dist+1)*dx[k]][cur.second + (dist+1)*dy[k]] == 'W') {
+                    ++dist;
+                }
+                if(pos_check({cur.first + (dist+1)*dx[k], cur.second + (dist+1)*dy[k]}) && vec[cur.first + (dist+1)*dx[k]][cur.second + (dist+1)*dy[k]] == 'B') {
+                    flip += dist;
+                }
             }
-            int D = (get.first * 2) % 10000;
-            int S = (get.first + 9999) % 10000;
-            int L = (get.first * 10 + get.first / 1000) % 10000;
-            int R = ((get.first % 10) * 1000 + (get.first / 10)) % 10000;
-            if(visited[D] == 0) {
-                visited[D] = 1;
-                q.push({D, get.second + "D"});
-            }
-            if(visited[S] == 0) {
-                visited[S] = 1;
-                q.push({S, get.second + "S"});
-            }
-            if(visited[L] == 0) {
-                visited[L] = 1;
-                q.push({L, get.second + "L"});
-            }
-            if(visited[R] == 0) {
-                visited[R] = 1;
-                q.push({R, get.second + "R"});
+            if(max_flip < flip) {
+                max_flip = flip;
+                max_loc = cur;
             }
         }
-        cout << ret << '\n';
+    }
+    if(max_loc.first == -1 && max_loc.second == -1) {
+        cout << "PASS\n";
+    } else {
+        cout << max_loc.second << ' ' << max_loc.first << '\n' << max_flip << '\n';
     }
 }

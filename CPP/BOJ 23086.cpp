@@ -504,50 +504,71 @@ pll CRT(vll &M, vll &A) {
 // typedefs
 
 // Global Variables
+vector<unordered_map<int, int>> connected(100010);
+vpii friends;
+vint deletes;
 
 // functions
 
 int main() {
     FASTIO;
-    int t;
-    cin >> t;
-    while(t--) {
-        int a, b;
-        cin >> a >> b;
-        queue<pair<int, string>> q;
-        q.push({a, ""});
-        bool find = false;
-        string ret;
-        int visited[10000] = {0, };
-        visited[a]++;
-        while(!q.empty() && !find) {
-            auto get = q.front(); q.pop();
-            if(get.first == b) {
-                find = true;
-                ret = get.second;
-                break;
-            }
-            int D = (get.first * 2) % 10000;
-            int S = (get.first + 9999) % 10000;
-            int L = (get.first * 10 + get.first / 1000) % 10000;
-            int R = ((get.first % 10) * 1000 + (get.first / 10)) % 10000;
-            if(visited[D] == 0) {
-                visited[D] = 1;
-                q.push({D, get.second + "D"});
-            }
-            if(visited[S] == 0) {
-                visited[S] = 1;
-                q.push({S, get.second + "S"});
-            }
-            if(visited[L] == 0) {
-                visited[L] = 1;
-                q.push({L, get.second + "L"});
-            }
-            if(visited[R] == 0) {
-                visited[R] = 1;
-                q.push({R, get.second + "R"});
-            }
-        }
-        cout << ret << '\n';
+    int n, m, k;
+    cin >> n >> m >> k;
+    friends = GET_N_PII(m);
+    REP(i, 0, m) {
+        connected[friends[i].first][friends[i].second] = 1;
+        connected[friends[i].second][friends[i].first] = 1;
     }
+    deletes = GET_N_INTS(k);
+    int cnt = 0;
+    REP(i, 0, SIZE(deletes)) {
+        // 절교
+        connected[friends[deletes[i]-1].first].erase(friends[deletes[i]-1].second);
+        connected[friends[deletes[i]-1].second].erase(friends[deletes[i]-1].first);
+    }
+        // 모두 절교한 후 이분 그래프 확인
+        cnt++;
+        int part[n+1];
+        bool visited[n+1];
+        REP(j, 0, n+1) { part[j] = 0; visited[j] = false; }
+        visited[1] = true, part[1] = 1;
+        queue<int> q;
+        q.push(1);
+        bool valid = true;
+        while(!q.empty()) {
+            auto get = q.front(); q.pop();
+            for(const auto &p : connected[get]) {
+                if(!visited[p.first]) {
+                    visited[p.first] = true;
+                    part[p.first] = (part[get] == 1 ? 2 : 1);
+                    q.push(p.first);
+                } else {
+                    // 이미 방문한 지점인데 파트가 같으면 문제가 있음
+                    if(part[get] == part[p.first]) {
+                        valid = false;
+                        break;
+                    }
+                }
+            }
+            if(!valid) break;
+        }
+    if(!valid) {
+        cout << "-1\n";
+        return 0;
+    }
+    int P1 = 0, P2 = 0;
+    for(int i=1; i<=n; i++) {
+        if(part[i] == 1) P1++;
+        else P2++;
+    }
+    assert(P1+P2 != n);
+    for(int i=deletes.size()-1; i>=0; i--) {
+        if(part[friends[deletes[i]-1].first] == part[friends[deletes[i]-1].second]) {
+            // 같은 파트의 두 친구를 연결하려 하면 종료
+            cout << i+1 << '\n' << P1 << ' ' << P2 << '\n';
+            return 0;
+        }
+    }
+    cout << "0\n" << P1 << ' ' << P2 << '\n';
+    return 0;
 }

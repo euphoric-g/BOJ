@@ -507,47 +507,64 @@ pll CRT(vll &M, vll &A) {
 
 // functions
 
+/*
+    2자리 = 3-1 ~ 3+1 = 2 ~ 4
+    3자리 = 9-3-1 ~ 9+3+1 = 5 ~ 13
+    4자리 = 27-13 ~ 27+13 = 14 ~ 40
+    n자리 = 3^(n-1)-3^(n-2)- ... - 1
+    0 : 0
+    1 : 1
+    2 : 1T
+    3 : 10
+    4 : 11
+    5 : 1TT
+    6 : 
+*/
+ll POW(int n) {
+    ll ret = 1;
+    while(n--) ret *= 3;
+    return ret;
+}
+
 int main() {
     FASTIO;
-    int t;
-    cin >> t;
-    while(t--) {
-        int a, b;
-        cin >> a >> b;
-        queue<pair<int, string>> q;
-        q.push({a, ""});
-        bool find = false;
-        string ret;
-        int visited[10000] = {0, };
-        visited[a]++;
-        while(!q.empty() && !find) {
-            auto get = q.front(); q.pop();
-            if(get.first == b) {
-                find = true;
-                ret = get.second;
-                break;
-            }
-            int D = (get.first * 2) % 10000;
-            int S = (get.first + 9999) % 10000;
-            int L = (get.first * 10 + get.first / 1000) % 10000;
-            int R = ((get.first % 10) * 1000 + (get.first / 10)) % 10000;
-            if(visited[D] == 0) {
-                visited[D] = 1;
-                q.push({D, get.second + "D"});
-            }
-            if(visited[S] == 0) {
-                visited[S] = 1;
-                q.push({S, get.second + "S"});
-            }
-            if(visited[L] == 0) {
-                visited[L] = 1;
-                q.push({L, get.second + "L"});
-            }
-            if(visited[R] == 0) {
-                visited[R] = 1;
-                q.push({R, get.second + "R"});
+    ll dp[20] = {0, };
+    REP(i, 1, 20) dp[i] = 3*dp[i-1]+1;
+    // dp[3] = 1 + 3 + 9
+    ll n;
+    cin >> n;
+    if(n == 0) {
+        cout << "0\n";
+        return 0;
+    }
+    bool inv = false;
+    if(n < 0) { inv = true; n = -n; }
+    int length = 1;
+    string ret = "";
+    while(1) {
+        ll pow = POW(length-1);
+        if(pow-dp[length-1] <= n && pow+dp[length-1] >= n) break;
+        length++;
+    }
+    REP(i, 0, length) {
+        if(i == 0) {
+            ret += "1";
+            n -= POW(length-1-i);
+        } else {
+            if(n > dp[length-i-1]) {
+                ret += "1";
+                n -= POW(length-1-i);
+            } else if(n < -dp[length-i-1]) {
+                ret += "T";
+                n += POW(length-1-i);
+            } else {
+                ret += "0";
             }
         }
-        cout << ret << '\n';
     }
+    if(inv) REP(i, 0, SIZE(ret)) {
+        if(ret[i] == 'T') ret[i] = '1';
+        else if(ret[i] == '1') ret[i] = 'T';
+    }
+    cout << ret << '\n';
 }

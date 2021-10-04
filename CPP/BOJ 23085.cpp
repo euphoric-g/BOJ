@@ -504,50 +504,44 @@ pll CRT(vll &M, vll &A) {
 // typedefs
 
 // Global Variables
-
+int visited[3001][3001];
 // functions
 
 int main() {
     FASTIO;
-    int t;
-    cin >> t;
-    while(t--) {
-        int a, b;
-        cin >> a >> b;
-        queue<pair<int, string>> q;
-        q.push({a, ""});
-        bool find = false;
-        string ret;
-        int visited[10000] = {0, };
-        visited[a]++;
-        while(!q.empty() && !find) {
+    int n, k;
+    cin >> n >> k;
+    string s;
+    cin >> s;
+    int H = 0, T = 0;
+    REP(i, 0, SIZE(s)) {
+        if(s[i] == 'H') ++H;
+        else ++T;
+    }
+    int t = 0;
+    queue<pii> q;
+    q.push({H, T});
+    while(!q.empty()) {
+        int sz = q.size();
+        t++;
+        while(sz--) {
             auto get = q.front(); q.pop();
-            if(get.first == b) {
-                find = true;
-                ret = get.second;
-                break;
+            if(get.first == 0 && get.second == n) {
+                std::cout << t-1 << '\n';
+                return 0;
             }
-            int D = (get.first * 2) % 10000;
-            int S = (get.first + 9999) % 10000;
-            int L = (get.first * 10 + get.first / 1000) % 10000;
-            int R = ((get.first % 10) * 1000 + (get.first / 10)) % 10000;
-            if(visited[D] == 0) {
-                visited[D] = 1;
-                q.push({D, get.second + "D"});
-            }
-            if(visited[S] == 0) {
-                visited[S] = 1;
-                q.push({S, get.second + "S"});
-            }
-            if(visited[L] == 0) {
-                visited[L] = 1;
-                q.push({L, get.second + "L"});
-            }
-            if(visited[R] == 0) {
-                visited[R] = 1;
-                q.push({R, get.second + "R"});
+            for(int i=0; i<=min(get.first, k); i++) {
+                // H i개를 골랐으면 T는 k-i개가 선택됨
+                // H는 |H|+k-2*i개, |T| = |T|-k+2*i
+                if(get.first < i || get.second < k-i) continue;
+                pii next = {get.first+k-2*i, get.second-k+2*i};
+                if(next.first >= 0 && next.first <= n && next.second >= 0 && next.second <= n && !visited[next.first][next.second]) {
+                    visited[next.first][next.second] = t;
+                    q.push(next);
+                }
             }
         }
-        cout << ret << '\n';
     }
+    cout << "-1\n";
+    return 0;
 }

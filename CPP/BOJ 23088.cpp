@@ -502,52 +502,57 @@ pll CRT(vll &M, vll &A) {
 // Definitions
 
 // typedefs
+typedef tuple<int, int, int, int> dat;
+typedef vector<dat> vdat;
+// 우선순위, 실행시간, 번호, 요청시점
 
 // Global Variables
+struct vdat_cmp {
+    bool operator()(dat &a, dat &b) {
+        // 우선순위(우선순위 - 요청 시간) 높은 순 -> 실행 시간 짧은 순 -> 번호 작은 순
+        int p1, b1, n1, t1, p2, b2, n2, t2;
+        tie(p1, b1, n1, t1) = a;
+        tie(p2, b2, n2, t2) = b;
+        if(p1 - t1 != p2 - t2) return p1-t1 < p2-t2;
+        if(b1 != b2) return b1 > b2;
+        return n1 > n2;
+    }
+};
 
 // functions
 
 int main() {
     FASTIO;
-    int t;
-    cin >> t;
-    while(t--) {
-        int a, b;
-        cin >> a >> b;
-        queue<pair<int, string>> q;
-        q.push({a, ""});
-        bool find = false;
-        string ret;
-        int visited[10000] = {0, };
-        visited[a]++;
-        while(!q.empty() && !find) {
-            auto get = q.front(); q.pop();
-            if(get.first == b) {
-                find = true;
-                ret = get.second;
-                break;
-            }
-            int D = (get.first * 2) % 10000;
-            int S = (get.first + 9999) % 10000;
-            int L = (get.first * 10 + get.first / 1000) % 10000;
-            int R = ((get.first % 10) * 1000 + (get.first / 10)) % 10000;
-            if(visited[D] == 0) {
-                visited[D] = 1;
-                q.push({D, get.second + "D"});
-            }
-            if(visited[S] == 0) {
-                visited[S] = 1;
-                q.push({S, get.second + "S"});
-            }
-            if(visited[L] == 0) {
-                visited[L] = 1;
-                q.push({L, get.second + "L"});
-            }
-            if(visited[R] == 0) {
-                visited[R] = 1;
-                q.push({R, get.second + "R"});
-            }
-        }
-        cout << ret << '\n';
+    int n;
+    cin >> n;
+    vdat vec;
+    priority_queue<dat, vdat, vdat_cmp> pq;
+    REP(i, 0, n) {
+        int t, p, b;
+        cin >> t >> p >> b;
+        vec.push_back(make_tuple(p, b, i+1, t));
     }
+    sort(ALL(vec), [](const dat &a, const dat &b) -> bool {
+        int p1, b1, n1, t1, p2, b2, n2, t2;
+        tie(p1, b1, n1, t1) = a;
+        tie(p2, b2, n2, t2) = b;
+        // 요청시간이 빠른것이 맨 뒤로 가야 꺼내기 용이함
+        return t1 > t2;
+    });
+    vint ans;
+    int time = 0;
+    while(!(vec.empty() && pq.empty())) {
+        while(!vec.empty() && get<3>(vec.back()) <= time) {
+            pq.push(vec.back()); vec.pop_back();
+        }
+        if(pq.empty()) {
+            ++time;
+            continue;
+        }
+        auto cur = pq.top(); pq.pop();
+        ans.push_back(get<2>(cur));
+        time += get<1>(cur);
+    }
+    PRINT(ans);
+    return 0;
 }

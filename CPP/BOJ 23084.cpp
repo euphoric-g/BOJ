@@ -509,45 +509,73 @@ pll CRT(vll &M, vll &A) {
 
 int main() {
     FASTIO;
-    int t;
-    cin >> t;
-    while(t--) {
-        int a, b;
-        cin >> a >> b;
-        queue<pair<int, string>> q;
-        q.push({a, ""});
-        bool find = false;
-        string ret;
-        int visited[10000] = {0, };
-        visited[a]++;
-        while(!q.empty() && !find) {
-            auto get = q.front(); q.pop();
-            if(get.first == b) {
-                find = true;
-                ret = get.second;
-                break;
-            }
-            int D = (get.first * 2) % 10000;
-            int S = (get.first + 9999) % 10000;
-            int L = (get.first * 10 + get.first / 1000) % 10000;
-            int R = ((get.first % 10) * 1000 + (get.first / 10)) % 10000;
-            if(visited[D] == 0) {
-                visited[D] = 1;
-                q.push({D, get.second + "D"});
-            }
-            if(visited[S] == 0) {
-                visited[S] = 1;
-                q.push({S, get.second + "S"});
-            }
-            if(visited[L] == 0) {
-                visited[L] = 1;
-                q.push({L, get.second + "L"});
-            }
-            if(visited[R] == 0) {
-                visited[R] = 1;
-                q.push({R, get.second + "R"});
+    string s;
+    int dp[26] = {0, };
+    int n;
+    cin >> s >> n;
+    for(int i=0; i<s.size(); i++) {
+        dp[s[i] - 'a']++;
+    }
+    while(n--) {
+        string cand;
+        cin >> cand;
+        if(cand.size() < s.size()) {
+            cout << "NO\n";
+            continue;
+        }
+        int cand_dp[2000][26];
+        for(int i=0; i<cand.size(); i++) {
+            for(int j=0; j<26; j++) {
+                if(i == 0) {
+                    cand_dp[i][j] = (cand[i] == 'a'+j) ? 1 : 0;
+                } else {
+                    cand_dp[i][j] = (cand[i] == 'a'+j) ? cand_dp[i-1][j]+1 : cand_dp[i-1][j];
+                }
             }
         }
-        cout << ret << '\n';
+        if(cand.size() == s.size()) {
+            // 다 같고 하나만 달라야 가능
+            int minus = 0, plus = 0, m_cnt = 0, p_cnt = 0;
+            for(int i=0; i<26; i++) {
+                int from_dp = dp[i];
+                int from_cand = cand_dp[cand.size()-1][i];
+                if(from_dp < from_cand) {
+                    plus++;
+                    p_cnt += from_cand - from_dp;
+                } else if(from_dp > from_cand) {
+                    minus++;
+                    m_cnt += from_dp - from_cand;
+                }
+            }
+            if(minus == 1 && plus == 1 && m_cnt == 1 && p_cnt == 1) {
+                cout << "YES\n";
+            } else cout << "NO\n";
+            continue;
+        }
+        bool valid = false;
+        for(int i=0; i<cand.size() && !valid; i++) {
+            // i ~ i+s.size() 까지 겹치는 경우
+            if(i+s.size() > cand.size()) break;
+            // 범위 초과 시 탈출
+            // 비교
+            int minus = 0, plus = 0, m_cnt = 0, p_cnt = 0;
+            REP(j, 0, 26) {
+                int from_dp = dp[j], from_cand = (i == 0) ? cand_dp[i+s.size()-1][j] : cand_dp[i+s.size()-1][j] - cand_dp[i-1][j];
+                if(from_dp < from_cand) {
+                    plus++;
+                    p_cnt += from_cand - from_dp;
+                } else if(from_dp > from_cand) {
+                    minus++;
+                    m_cnt += from_dp - from_cand;
+                }
+            }
+            if(minus == 1 && plus == 1 && m_cnt == 1 && p_cnt == 1) {
+                valid = true;
+            } else if(!(minus+plus+m_cnt+p_cnt)) {
+                valid = true;
+            }
+        }
+        if(valid) cout << "YES\n";
+        else cout << "NO\n";
     }
 }
